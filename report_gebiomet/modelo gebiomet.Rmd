@@ -1,0 +1,305 @@
+---
+title: "Analisys INTA"
+author: "Edgar de S. Vismara e Frederico M. C. Vieira"
+date: \today
+fontsize: 12pt
+german: false # default is English
+bibliography: bib/references.bib, bib/packages.bib
+bibliographystyle: bib/bibstyle.bst
+params:
+  # replace path to images or remove lines (one has to be kept in!)
+  cover: images/cover.png
+  title_logo_left: images/logo_min.jpg
+  title_logo_right: images/min_logo.jpg
+  logo_small: images/uhh_logo.jpg
+header-includes: 
+  # if you removed one image path in 'params', remove the respective line here:
+  - \newcommand{\cover}{`r gsub("_", "\\_", params$cover)`}
+  - \newcommand{\titlelogoleft}{`r gsub("_", "\\_", params$title_logo_left)`}
+  - \newcommand{\titlelogoright}{`r gsub("_", "\\_", params$title_logo_right)`}
+  - \newcommand{\logosmall}{`r gsub("_", "\\_", params$logo_small)`}
+output: 
+  UHHformats::pdf_report:
+    font: "Helvetica" 
+    #extra_dependencies:
+      #babel: ["brazil"]
+---
+
+```{r setup, include = FALSE}
+# settings --> keep this chunk as it is!
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, 
+  warning = FALSE, error = FALSE, cache = TRUE,
+  fig.path='figs/', cache.path = 'cache/')
+```
+
+```{r load-packages, include = FALSE}
+# packages
+library(knitr)
+library(kableExtra)
+library(xtable)
+library(tidyverse)
+```
+
+```{r generate-package-refs, include=FALSE}
+# Create a bib database for R packages used on report
+# NOTE: RUN THIS CODE CHUNK MANUALLY TO CREATE FILE BEFORE KNITTING
+knitr::write_bib(
+  x = c(.packages(), 'bookdown', 'rmarkdown', 'UHHformats',
+    # Add here now all packages that are loaded above:
+    'knitr', 'kableExtra', 'xtable', 'tidyverse'), 
+  file = 'bib/packages.bib'
+)
+```
+
+# Introduction
+
+# Background
+
+## Bayesian framework
+
+The Bayesian framework, is a powerful and flexible statistical framework that provides a systematic and coherent approach to uncertainty and inference. At its core, Bayesian statistics is founded on the principles of probability theory and Bayes' theorem, which allow us to update our beliefs in light of new evidence.
+
+According to McElreath (ano), Bayesian statistics emphasizes the importance of assigning probabilities to uncertain events or parameters. Unlike traditional frequentist statistics, where parameters are considered fixed and unknown, Bayesian statistics treats them as random variables with probability distributions. This paradigm shift allows us to incorporate prior knowledge or beliefs into our analyses, making Bayesian methods particularly well-suited for handling complex and uncertain problems.
+
+One central concept in the Bayesian framework is the predictive posterior distribution. This distribution captures our updated beliefs about a parameter or the outcome of an event after observing new data. It combines our prior beliefs (expressed as a prior distribution) with the likelihood of the observed data given the parameter (expressed as a likelihood function) to produce a posterior distribution. This posterior distribution represents our updated uncertainty about the parameter or event, accounting for both prior knowledge and new evidence.
+
+The predictive posterior distribution is especially valuable because it allows us to make predictions about future observations or events. By sampling from the posterior distribution, we can generate a range of possible outcomes, each weighted by its posterior probability. This approach not only provides point estimates but also quantifies uncertainty, making Bayesian statistics a powerful tool for decision-making, forecasting, and modeling in a wide range of fields, from science and engineering to finance and machine learning.
+
+In summary the Bayesian framework emphasizes the integration of prior knowledge and observed data through probability theory, resulting in a coherent and principled approach to inference. The predictive posterior distribution, a fundamental concept in Bayesian statistics, encapsulates our updated beliefs and serves as a valuable tool for making informed decisions and predictions in the face of uncertainty.
+
+## Prior selection
+
+According To Gelman (2006) we characterize a prior distribution as weakly informative if it is set up so that the information it does provide is intentionally weaker than whatever actual prior knowledge is available. In general any problem has some natural constraints that would allow a weakly-informative model. For example, for regression models on the logarithmic or logit scale, with predictors that are binary or scaled to have standard deviation 1, we can be sure for most applications that effect sizes will be less than 10, etc.
+
+The Regularization priors are a fundamental concept in Bayesian modeling. Their primary purpose is to prevent overfitting and stabilize model behavior by imposing penalties on parameter estimates. Regularization priors encourage parameter estimates to be close to zero or within a specific range, promoting model simplicity and generalization.
+
+McElreath's approach emphasizes the importance of regularization priors in making Bayesian models more robust, especially in situations with limited data or complex model structures. Regularization priors help stabilize parameter estimates, reduce model complexity, and enhance model interpretability.
+
+For example, suppose you're predicting housing prices based on features like square footage, bedrooms, and neighborhoods. You employ a Bayesian linear regression model with regularization priors (on coefficients ($\beta_i \sim \mathcal{N}(0, \sigma^2)$). The regularization strength parameter, $\sigma^2$, is set to 0.5, indicating a moderate level of regularization.
+
+The regularization encourages coefficients to be small, preventing erratic model behavior even with limited data. This approach balances data fitting and model stability, yielding a more robust and interpretable predictive model for housing prices.
+
+# Data analysis
+
+## Descriptive analysis
+
+## Non gaussian models
+
+### Behavior model
+
+$$
+\begin{aligned}
+&y_{ijkl} \sim \text{Poisson}(\lambda_{ijkl}) \\
+\log(\lambda_{ijkl}) &= \alpha_{ijl} + C_j + D_k + L_l + (CDL)_{jkl}  \\
+\alpha_{ijl} &\sim \text{Normal}(\mu_\alpha, \sigma_\alpha^2) \\
+\mu_\alpha &\sim \text{Normal}(1, 0.3) \\
+\sigma_{\alpha}^2 &\sim \text{Half-Cauchy}(0, 25) \\
+C_j &\sim \text{Normal}(0, 0.5) \\
+D_k &\sim \text{Normal}(0,0.5) \\
+L_l &\sim \text{Normal}(0,0.5) \\
+(CDL)_{jkl} &\sim \text{Normal}(0, 0.5) \\
+\end{aligned}
+$$
+
+Where:
+
+-   $y_{ijkl}$ represents the Poisson-distributed outcome for observation $i$ within the combination of levels of four factors $j$, $k$ and $l$.
+-   $\lambda_{ijkl}$ represents the Poisson rate parameter for observation $i$ within the combination of levels of three factors.
+-   The log of the Poisson rate parameter ($\log(\lambda_{ijkl})$) is modeled as the sum of the random intercept ($\alpha_{ijl}$) and the fixed effects ($C_j, D_k, L_l$), as well as the three-way interaction term ($(CDL)_{jkl}$).
+-   $\alpha_{ijl}$, represents a random effect for log counts within the individual $i$, which is nested within the category $j$, which is further nested within locality $l$
+-   $\mu_\alpha$ represents the mean of the random effects for the intercepts.
+-   $\sigma_{\alpha}^2$ represents the variance of the random effects for the intercepts.
+-   $C_j, D_k, L_l$ are fixed effects for factors $j$, $k$, and $l$.
+-   $(CDL)_{jkl}$ represents a three-way interaction term.
+
+#### Respiratory rate model
+
+the same but with $\mu_\alpha \sim \text{Normal}(3.5, 0.5)$ instead of $\mu_\alpha \sim \text{Normal}(1, 0.3)$
+
+#### Higyene and lameness Score model
+
+$$
+\begin{aligned}
+&y_{ijkl} \sim \text{Ordinal}(\theta_{ijkl}) \\
+\text{logit}(\theta_{ijkl}) &= \alpha_{ijl} + C_{j} + D_{k} + L_{l} + (CDL)_{jkl} \\
+\alpha_{ijl} &\sim \text{Normal}(\mu_\alpha, \sigma_\alpha^2) \\
+\mu_\alpha &\sim \text{Normal}(0, 1.5) \\
+\sigma_{\alpha}^2 &\sim \text{Half-Cauchy}(0, 25) \\
+C_j &\sim \text{Normal}(0, 0.5) \\
+D_k &\sim \text{Normal}(0, 0.5) \\
+L_l &\sim \text{Normal}(0, 0.5) \\
+(CDL)_{jkl} &\sim \text{Normal}(0, 0.5) \\
+\end{aligned}
+$$
+
+where:
+
+-   $y_{ijkl}$ represents the ordinal-distributed outcome for observation $i$ within the combination of levels of three factors: $j$, $k$, and $l$.
+-   $\theta_{ijkl}$ represents the cumulative log-odds of the ordinal response categories for observation $i$ within the combination of $j$ categories, $k$ localities, and $l$ days.
+-   The logit link function ($\text{logit}(\theta_{ijkl})$) is modeled as the sum of the random intercept ($\alpha_{ijl}$) and the coefficients for the main effects ($C_j, D_k, L_l$) and the triple interaction ($(CDL)_{jkl}$) between the three factors.
+-   $\alpha_{ijl}$ represents a random effect for the cumulative log-odds within the individual $i$, which is nested within the category $j$, which is further nested within locality $l$.
+-   $\mu_\alpha$ represents the mean of the random effects for the cumulative log-odds.
+-   $\sigma_\alpha^2$ represents the variance of the random effects for the cumulative log-odds.
+-   $C_j, D_k, L_l$ are coefficients for the main effects of the three factors.
+-   $(CDL)_{jkl}$ is a coefficient for the triple interaction between the three factors.
+
+## Gaussian models
+
+### Temperature of the bed model
+
+$$
+\begin{aligned}
+&y_{ijkl} \sim \text{Normal}(\mu_{ijkl}, \sigma^2) \\
+\mu_{ijkl} &= \alpha + M_j + D_k + L_l + (CDL)_{jkl}  \\
+\alpha &\sim \text{Normal}(25, 10) \\
+M_j &\sim \text{Normal}(0, 5) \\
+D_k &\sim \text{Normal}(0, 5) \\
+L_l &\sim \text{Normal}(0, 5) \\
+(MDL)_{jkl} &\sim \text{Normal}(0, 5) \\
+\sigma^2 &\sim \text{Half-Cauchy}(0, 25) \\
+\end{aligned}
+$$
+
+Where:
+
+-   $y_{ijkl}$ represents the gaussian-distributed outcome for observation $i$ within the combination of levels of three factors $j$, $k$ and $l$.
+-   $\mu_{ijkl}$ represents the parameter mean of Gaussian distributions and is modeled as the sum of the intercept ($\alpha$) and the predictors ($M_j, D_k, L_l$), as well as the three-way interaction term ($(MDL)_{jkl}$).
+-   $M_j, D_k, L_l$ are the effects for factors $j$, $k$, and $l$.
+-   $(MDL)_{jkl}$ represents a three-way interaction term.
+-   $\sigma^2$ represents the variance of the outcome variable.
+
+### Milking production model
+
+$$
+\begin{aligned}
+&y_{ijkl} \sim \text{Normal}(\mu_{ijkl}, \sigma^2) \\
+\mu_{ijkl}&= \alpha_{ijk} + C_j + D_k + L_l + (CDL)_{jkl}  \\
+\alpha_{ijk} &\sim \text{Normal}(\mu_\alpha, \sigma_\alpha^2) \\
+\mu_\alpha &\sim \text{Normal}(35, 10) \\
+\sigma_{\alpha}^2 &\sim \text{Half-Cauchy}(0, 25) \\
+C_j &\sim \text{Normal}(0, 5) \\
+D_k &\sim \text{Normal}(0, 5) \\
+L_l &\sim \text{Normal}(0, 5) \\
+(CDL)_{jkl} &\sim \text{Normal}(0, 5) \\
+\sigma^2 &\sim \text{Half-Cauchy}(0, 25) \\
+\end{aligned}
+$$
+
+Where:
+
+-   $y_{ijkl}$ represents the gaussian-distributed outcome for observation $i$ within the combination of levels of three factors $j$, $k$ and $l$.
+-   $\mu_{ijkl}$ represents the parameter mean of Gaussian distributions and is modeled as the sum of the random intercept ($\alpha_{ijl}$) and the fixed effects ($C_j, D_k, L_l$), as well as the three-way interaction term ($(CDL)_{jkl}$).
+-   $\alpha_{ijl}$ represents a random effect for the intercept within the individual $i$, which is nested within the category $j$, which is further nested within locality $l$.
+-   $\mu_\alpha$ represents the mean of the random effects for the intercepts.
+-   $\sigma_{\alpha}^2$ represents the variance of the random effects for the intercepts.
+-   $C_j, D_k, L_l$ are fixed effects for factors $j$, $k$, and $l$.
+-   $(CDL)_{jkl}$ represents a three-way interaction term.
+-   $\sigma^2$ represents the variance of the outcome variable.
+
+You may refer to this equation using `\ref{eq:label}`, e.g., see Equation \ref{eq:mean}
+
+<!-- This will start a new page (LaTeX code) -->
+
+\newpage
+
+# Results
+
+Table \ref{tab:kable_tab} is an example when using `knitr::kable()` to generate the table and *kableExtra* functions to modify it:
+
+```{r}
+df <- mtcars[1:5, 1:6]
+kable(df, "latex",
+  booktabs = TRUE,
+  caption = "A table produced with knitr and kableextra",
+  label = "kable_tab") %>%
+kable_styling(position = "center", font_size = 9,
+latex_options = "HOLD_position") %>%
+add_header_above(c(" " = 1, "Group 1" = 2, "Group 2" = 2,
+"Group 3" = 1, "Group 4" = 1)) %>%
+add_header_above(c(" ", "Group 5" = 4, "Group 6" = 2), bold = T) %>%
+footnote(general = "Your comments go here.")
+```
+
+## Figures
+
+```{=tex}
+\begin{figure}
+  \centering
+  \includegraphics[width=\linewidth]{/Users/edgarvismara/Downloads/Argentina (1)/plots/OCIOP_btw_cat.pdf} 
+  \caption{Comparing predictive posterior distribution of 'OCIOP' of categories across days on both localities.}
+  \label{fig:sample}
+\end{figure}
+```
+# Adding citations and bibliography
+
+Link a `.bib` document via the YAML header and the bibliography will be printed at the very end (as usual). The default bibliography style is provided in the `bib.bst` file (do not delete), which adopts the [SAGE Harvard](https://uk.sagepub.com/sites/default/files/sage_harvard_reference_style_0.pdf) reference style.
+
+References can be cited directly within the document using the R Markdown equivalent of the \LaTeX citation system `[@key]`, where key is the citation key in the first line of the entry in the .bib file. Example: [@Taylor1937]. To cite multiple entries, separate the keys by semicolons, e.g. [@Knupp1999; @Kamm2000].
+
+There is also the package [citr](https://github.com/crsh/citr), which I highly recommend: *citr* provides functions and an RStudio add-in to search a BibTeX-file to create and insert formatted Markdown citations into the current document. If you are using the reference manager [Zotero](https://www.zotero.org/) the add-in can access your reference database directly.
+
+## Software
+
+If you want to include a paragraph on the software used, here is some example text/code to get the current R and package versions. The code to create a separate bibiliography file named 'packages.bib' with all package references has already been added at the beginning of this script (code chunk 'generate-package-refs').
+
+All analyses were performed using the statistical software R (version `r paste(R.Version()$major, R.Version()$minor, sep = ".")`) [@R-base]. This report, including tables and figures, was generated using the packages 'rmarkdown' (version `r packageVersion("rmarkdown")`) [@R-rmarkdown], 'bookdown' (version `r packageVersion("bookdown")`) [@R-bookdown], 'UHHformats' (version `r packageVersion("UHHformats")`) [@R-UHHformats], 'knitr' (version `r packageVersion("knitr")`) [@R-knitr], 'kableExtra' (version `r packageVersion("kableExtra")`) [@R-kableExtra], 'xtable' (version `r packageVersion("xtable")`) [@R-xtable], and 'tidyverse' (version `r packageVersion("tidyverse")`) [@R-tidyverse.]
+
+<!-- paper Structure -->
+
+<!-- # Introduction -->
+
+<!-- ## Background and Motivation -->
+
+<!-- ## Significance of Informative and Non-Informative Priors  -->
+
+<!-- ## Research Objective -->
+
+<!-- # Bayesian Linear Regression with Informative Priors -->
+
+<!-- ## Overview of Bayesian Linear Regression -->
+
+<!-- ## Incorporating Informative Priors -->
+
+<!-- ## Selection and Specification of Informative Priors -->
+
+<!-- ## Expected Benefits and Impact -->
+
+<!-- ## Case Study Design: Dataset Selection and Preprocessing -->
+
+<!-- # Bayesian inference without Informative Priors -->
+
+<!-- ## Application of Non-Informative Priors -->
+
+<!-- ## Implicit Priors and Weak Priors -->
+
+<!-- ## Trade-offs and Challenges -->
+
+<!-- ## Case Study Implementation: Modeling without Informative Priors -->
+
+<!-- # Case Study Analysis -->
+
+<!-- ## Comparison of Model Fit and Predictive Performance -->
+
+<!-- ## Parameter Estimates: Informative vs. Non-Informative Priors -->
+
+<!-- ## Interpretability of Results -->
+
+<!-- ## Sensitivity Analysis: Impact of Prior Strength -->
+
+<!-- # Discussion -->
+
+<!-- ## Observed Differences in Parameter Estimates -->
+
+<!-- ## Robustness of Models to Different Priors -->
+
+<!-- ## Implications for Decision-Making -->
+
+<!-- ## Practical Considerations in Prior Selection -->
+
+<!-- # Conclusion -->
+
+<!-- ## Insights from the Case Study -->
+
+<!-- ## Generalizability to Other Modeling Scenarios -->
+
+<!-- ## Key Takeaways for Bayesian Analysis in modeling -->
