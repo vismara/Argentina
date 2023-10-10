@@ -342,16 +342,7 @@ plot_cont_cat_dia_local_OP <- ggplot(contraste_cat_dia_local_OP, aes(x = .value,
   geom_vline(xintercept = 0, linetype = "dashed") +
   facet_wrap(vars(LUGAR))
 
-dat_text <- data.frame(
-  label = c("4 cylinders", "6 cylinders", "8 cylinders"),
-  cyl   = c(4, 6, 8)
-)
-p + geom_text(
-  data    = dat_text,
-  mapping = aes(x = -Inf, y = -Inf, label = label),
-  hjust   = -0.1,
-  vjust   = -1
-)
+
 # Combined plot
 g_cdl_op = (plot_cat_dia_local_OP| plot_cont_cat_dia_local_OP + theme(axis.text.y = element_blank())) +
   plot_annotation(#title = "Posterior predictive frequency of 'OCIOP' between \n categories across days on both localities",
